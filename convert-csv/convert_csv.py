@@ -8,6 +8,7 @@ import codecs
 import json
 import datetime as dt
 import json
+import numpy as np
 
 import pandas as pd
 
@@ -17,14 +18,32 @@ pool_raw=filepaths
 print(filepaths)
 file_csv_raw =glob.glob('{}\*.csv'.format(pool_raw))
 
-
+kec_angin=[]
 count=0
 for h in file_csv_raw:
     a= os.path.normpath(h)
     file_name = os.path.basename(a).split('.')[0]
     print(a)
     csv_file = pd.DataFrame(pd.read_csv("{}".format(a), sep = ";", header =None,index_col = False,skipinitialspace = True,skip_blank_lines=True))
+
+    power=[]
+    power_ro=1.2
+    power_A=1
+
+    # for ind in csv_file:
+
+    #     kec_angin = (csv_file[3])
+    #     power_i=np.round(((power_ro*power_A*((kec_angin)**3))/2),decimals=4)
+    #     power.append(power_i)
+    # print(power)
+    # csv_file.assign(power)
     csv_file.columns =["ID_Turbin", "Date", "Time", "Kec_angin","Arah_angin","Derajat_angin"]
+    csv_file = csv_file.assign(Power=lambda x: np.round(((power_ro*power_A*((x.Kec_angin)**3))/2),decimals=4))
+
+    
+
+    print(csv_file['Power'][16])
+
     # df['Date'] = pd.to_datetime(df.Date, format='%Y-%m-%d %H:%M:%S')
     # csv_file['Time'] = pd.to_datetime(csv_file.Time, format="%H:%M:%S")
     # csv_file['Time']= csv_file['Time'].dt.strftime("%H:%M:%S")
