@@ -10,6 +10,12 @@ from openpyxl.chart import (
 )
 from openpyxl.drawing.image import Image
 
+from openpyxl.styles.borders import Border, Side
+
+from openpyxl.styles import Font, Alignment,PatternFill
+
+import numpy as np
+
 def simpan_excel(pool_path_simpan,nama_file_analitik,pool_json_raw,timeType,keluar_analitik):
     
     workbook = xlsxwriter.Workbook('{}\{} per {}.xlsx'.format(pool_path_simpan,nama_file_analitik,timeType))
@@ -36,7 +42,7 @@ def simpan_excel(pool_path_simpan,nama_file_analitik,pool_json_raw,timeType,kelu
 
 
     RAW_Data = workbook.add_worksheet('RAW_Data')
-    RAW_Data.write('A1', 'ID_Turbin')
+    RAW_Data.write('A1', 'ID_Device')
     RAW_Data.write('B1', 'Date')
     RAW_Data.write('C1', 'Time')
     RAW_Data.write('D1', 'Kec_angin')
@@ -81,7 +87,7 @@ def simpan_excel(pool_path_simpan,nama_file_analitik,pool_json_raw,timeType,kelu
 
         date_time = datetime.strptime(raw['Time'], '%H:%M:%S')
 
-        RAW_Data.write(row, col, raw['ID_Turbin'])
+        RAW_Data.write(row, col, raw['ID_Device'])
         RAW_Data.write(row, col+1, raw['Date'] )
         RAW_Data.write_datetime(row, col+2, date_time,cell_format )
         RAW_Data.write_number(row, col+3, raw['Kec_angin'] )
@@ -136,50 +142,231 @@ def cari_count(json_pool,kec_low,kec_high,kec_0_2):
 
 def simpan_excel_openpyxl(pool_path_simpan,nama_file_analitik,pool_json_raw,timeType,keluar_analitik,file_name):
     workbook = Workbook()
-    
+
+    border_normal = Border(left=Side(style='thin'), 
+                     right=Side(style='thin'), 
+                     top=Side(style='thin'), 
+                     bottom=Side(style='thin'))
+
+    bold=Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),left=Side(style='thick'),right=Side(style='thick'))
+
     sheet1 = workbook.active
     sheet1.title = "Analytics"
 
     sheet2 = workbook.create_sheet("RAW_Data")
+    sheet1.merge_cells('N3:N5')
 
-    sheet1['P2']= 'Kec_angin (m/s)'
-    sheet1['Q2']= 'Max'
-    sheet1['Q3']= 'Mean'
-    sheet1['Q4']= 'Std'
-    sheet1['R1']= 'U'
-    sheet1['S1']= 'TL'
-    sheet1['T1']= 'T'
-    sheet1['U1']= 'Tg'
-    sheet1['V1']= 'S'
-    sheet1['W1']= 'BD'
-    sheet1['X1']= 'B'
-    sheet1['Y1']= 'BL'
-    sheet1['P6']= 'Theoritical Power (Watt)'
-    sheet1['Q6']= 'Max'
-    sheet1['Q7']= 'Mean'
-    sheet1['Q8']= 'Std'
+    sheet1['N3']= 'Kec_angin (m/s)'
+    sheet1['N3'].font = Font(bold=True)
+    sheet1['N3'].alignment = Alignment(horizontal='center', vertical='center')
+
+
+    sheet1['O3']= 'Max'
+    sheet1['O3'].font = Font(bold=True)
+
+    sheet1['O4']= 'Mean'
+    sheet1['O4'].font = Font(bold=True)
+
+    sheet1['O5']= 'Std'
+    sheet1['O5'].font = Font(bold=True)
+
+    sheet1['P2']= 'U'
+    sheet1['P2'].font = Font(bold=True)
+
+    sheet1['Q2']= 'TL'
+    sheet1['Q2'].font = Font(bold=True)
+
+    sheet1['R2']= 'T'
+    sheet1['R2'].font = Font(bold=True)
+
+    sheet1['S2']= 'Tg'
+    sheet1['S2'].font = Font(bold=True)
+
+    sheet1['T2']= 'S'
+    sheet1['T2'].font = Font(bold=True)
+
+    sheet1['U2']= 'BD'
+    sheet1['U2'].font = Font(bold=True)
+
+    sheet1['V2']= 'B'
+    sheet1['V2'].font = Font(bold=True)
+
+    sheet1['W2']= 'BL'
+    sheet1['W2'].font = Font(bold=True)
+
+    sheet1['X2']= 'ALL'
+    sheet1['X2'].font = Font(bold=True)
+
+    sheet1.merge_cells('N7:N9')
+    sheet1['N7']= 'Theoritical Power (Watt)'
+    sheet1['N7'].font = Font(bold=True)
+    sheet1['N7'].alignment = Alignment(horizontal='center', vertical='center')
+    
+    sheet1['O7']= 'Max'
+    sheet1['O7'].font = Font(bold=True)
+    
+    sheet1['O8']= 'Mean'
+    sheet1['O8'].font = Font(bold=True)
+    
+    sheet1['O9']= 'Std'
+    sheet1['O9'].font = Font(bold=True)
+
+    a=np.arange(3,6)
+    b=np.arange(15,25)
+    for row_border in a:
+        for col_border in b:
+            sheet1.cell(row=row_border,column=col_border).border=border_normal
+            sheet1.cell(row=row_border+4,column=col_border).border=border_normal
+
+    a=6
+    b=np.arange(14,25)
+    for col_border in b:
+        sheet1.cell(row=a,column=col_border).border=Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'))
+
+        if col_border==14:
+            sheet1.cell(row=a,column=col_border).border=  Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),left=Side(style='thick'))
+        elif col_border==24:
+            sheet1.cell(row=a,column=col_border).border=  Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),right=Side(style='thick'))
+
+        sheet1.cell(row=a,column=col_border).fill= PatternFill("solid", start_color="757575")
+        #757575
+
+    a=2
+    b=np.arange(14,25)
+    for col_border in b:
+        sheet1.cell(row=a,column=col_border).border=Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),left=Side(style='thin'),right=Side(style='thin'))
+
+        if col_border==14:
+            sheet1.cell(row=a,column=col_border).border=  Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),left=Side(style='thick'),right=Side(style='thin'))
+        elif col_border==24:
+            sheet1.cell(row=a,column=col_border).border=  Border(top=Side(style='thick'), 
+                     bottom=Side(style='thick'),right=Side(style='thick'),left=Side(style='thin'))
+        #757575
+
+    a=np.arange(3,6)
+    b=14
+    for row_border in a:
+        sheet1.cell(row=row_border,column=b).border=Border(left=Side(style='thick'))
+        sheet1.cell(row=row_border+4,column=b).border=Border(left=Side(style='thick'))
+
+        sheet1.cell(row=row_border,column=b+10).border=Border(right=Side(style='thick'))
+        sheet1.cell(row=row_border+4,column=b+10).border=Border(right=Side(style='thick'))
+
+        if (row_border+4)==9:
+            sheet1.cell(row=row_border+4,column=b).border=Border(left=Side(style='thick'),bottom=Side(style='thick'))
+            
+            sheet1.cell(row=row_border+4,column=b+10).border=Border(right=Side(style='thick'),bottom=Side(style='thick'))
+
+    a=9
+    b=np.arange(15,24)
+    for col_border in b:
+        sheet1.cell(row=a,column=col_border).border=Border(right=Side(style='thin'),left=Side(style='thin'),top=Side(style='thin'),bottom=Side(style='thick'))
+    
+
+
+
+
+    a=np.arange(19,28)
+    b=np.arange(9,19)
+    for row_border in a:
+        for col_border in b:
+            sheet1.cell(row=row_border,column=col_border).border=border_normal
+    
+    a=19
+    b=np.arange(9,19)
+    for col_border in b:
+        sheet1.cell(row=a,column=col_border).border=Border(top=Side(style='thick'),bottom=Side(style='thick'))
+
+        if (col_border==9):
+            sheet1.cell(row=a,column=col_border).border=Border(top=Side(style='thick'),bottom=Side(style='thick'),left=Side(style='thick'))
+        elif(col_border==18):
+            sheet1.cell(row=a,column=col_border).border=Border(top=Side(style='thick'),bottom=Side(style='thick'),right=Side(style='thick'))
+    
+
+    a=np.arange(20,28)
+    b=9
+    for row_border in a:
+        sheet1.cell(row=row_border,column=b).border=Border(left=Side(style='thick'),bottom=Side(style='thin'))
+        sheet1.cell(row=row_border,column=b+9).border=Border(right=Side(style='thick'),bottom=Side(style='thin'))
+
+        if (row_border==27):
+            sheet1.cell(row=row_border,column=b).border=Border(bottom=Side(style='thick'),left=Side(style='thick'))
+            sheet1.cell(row=row_border,column=b+9).border=Border(bottom=Side(style='thick'),right=Side(style='thick'))
+    
+    a=27
+    b=np.arange(10,18)
+    for col_border in b:
+        sheet1.cell(row=a,column=col_border).border=Border(bottom=Side(style='thick'),right=Side(style='thin'),left=Side(style='thin'))
+
+
+
+
+
+
+
+    
     sheet1['I21']= '0-2 m/s'
+    sheet1['I21'].font = Font(bold=True)
+
     sheet1['I22']= '2-4 m/s'
+    sheet1['I22'].font = Font(bold=True)
+
     sheet1['I23']= '4-6 m/s'
+    sheet1['I23'].font = Font(bold=True)
+
     sheet1['I24']= '6-8 m/s'
+    sheet1['I24'].font = Font(bold=True)
+
     sheet1['I25']= '8-10 m/s'
+    sheet1['I25'].font = Font(bold=True)
+
     sheet1['I26']= '10> m/s'
+    sheet1['I26'].font = Font(bold=True)
+
     sheet1['I27']= 'Total Keseluruhan'
-    sheet1['J19']= 'wind speed distribution(%)'
+    sheet1['I27'].font = Font(bold=True)
+
+    sheet1.merge_cells('I19:R19')
+    sheet1['I19']= 'Wind speed distribution(%)'
+    sheet1['I19'].font = Font(bold=True)
+    sheet1['I19'].alignment = Alignment(horizontal='center', vertical='center')
+
     sheet1['J20']= 'U'
+    sheet1['J20'].font = Font(bold=True)
+
     sheet1['K20']= 'TL'
+    sheet1['K20'].font = Font(bold=True)
+
     sheet1['L20']= 'T'
+    sheet1['L20'].font = Font(bold=True)
+
     sheet1['M20']= 'Tg'
+    sheet1['M20'].font = Font(bold=True)
+
     sheet1['N20']= 'S'
+    sheet1['N20'].font = Font(bold=True)
+
     sheet1['O20']= 'BD'
+    sheet1['O20'].font = Font(bold=True)
+
     sheet1['P20']= 'B'
+    sheet1['P20'].font = Font(bold=True)
+
     sheet1['Q20']= 'BL'
+    sheet1['Q20'].font = Font(bold=True)
 
 
 
 
 
-    sheet2['A1']='ID_Turbin'
+
+    sheet2['A1']='ID_Device'
     sheet2['B1']='Date'
     sheet2['C1']='Time'
     sheet2['D1']='Kec_angin'
@@ -200,7 +387,7 @@ def simpan_excel_openpyxl(pool_path_simpan,nama_file_analitik,pool_json_raw,time
     for raw in (pool_json_raw):
         date_time = datetime.strptime(raw['Time'], '%H:%M:%S').time()
 
-        sheet2.cell(row=iterate_row, column=1).value = raw['ID_Turbin']
+        sheet2.cell(row=iterate_row, column=1).value = raw['ID_Device']
         sheet2.cell(row=iterate_row, column=2).value = raw['Date']
         sheet2.cell(row=iterate_row, column=3).value = date_time
         
@@ -210,24 +397,24 @@ def simpan_excel_openpyxl(pool_path_simpan,nama_file_analitik,pool_json_raw,time
         sheet2.cell(row=iterate_row, column=7).value = raw['Power']
 
         if (raw==pool_json_raw[-1]):
-            iterate_row=2
+            iterate_row=3
         else:
             iterate_row += 1
     counter_analitik=0
     for A_proses in max_kec:
-        sheet1.cell(row=iterate_row,column=18+counter_analitik).value=(max_kec[counter_analitik])
-        sheet1.cell(row=iterate_row,column=18+counter_analitik).number_format='0.00'
-        sheet1.cell(row=iterate_row+1,column=18+counter_analitik).value=(mean_kec[counter_analitik])
-        sheet1.cell(row=iterate_row+1,column=18+counter_analitik).number_format='0.00'
-        sheet1.cell(row=iterate_row+2,column=18+counter_analitik).value=(std_kec[counter_analitik])
-        sheet1.cell(row=iterate_row+2,column=18+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row,column=16+counter_analitik).value=(max_kec[counter_analitik])
+        sheet1.cell(row=iterate_row,column=16+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row+1,column=16+counter_analitik).value=(mean_kec[counter_analitik])
+        sheet1.cell(row=iterate_row+1,column=16+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row+2,column=16+counter_analitik).value=(std_kec[counter_analitik])
+        sheet1.cell(row=iterate_row+2,column=16+counter_analitik).number_format='0.00'
 
-        sheet1.cell(row=iterate_row+4,column=18+counter_analitik).value=(max_power[counter_analitik])
-        sheet1.cell(row=iterate_row+4,column=18+counter_analitik).number_format='0.00'
-        sheet1.cell(row=iterate_row+5,column=18+counter_analitik).value=(mean_power[counter_analitik])
-        sheet1.cell(row=iterate_row+5,column=18+counter_analitik).number_format='0.00'
-        sheet1.cell(row=iterate_row+6,column=18+counter_analitik).value=(std_power[counter_analitik])
-        sheet1.cell(row=iterate_row+6,column=18+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row+4,column=16+counter_analitik).value=(max_power[counter_analitik])
+        sheet1.cell(row=iterate_row+4,column=16+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row+5,column=16+counter_analitik).value=(mean_power[counter_analitik])
+        sheet1.cell(row=iterate_row+5,column=16+counter_analitik).number_format='0.00'
+        sheet1.cell(row=iterate_row+6,column=16+counter_analitik).value=(std_power[counter_analitik])
+        sheet1.cell(row=iterate_row+6,column=16+counter_analitik).number_format='0.00'
 
 
         if (counter_analitik==max_kec[-1]):
@@ -264,15 +451,18 @@ def simpan_excel_openpyxl(pool_path_simpan,nama_file_analitik,pool_json_raw,time
     # set the title of the y-axis
     chart.y_axis.title = " Kec Angin (m/s)"
 
-    chart.width=22.5
+    chart.width=19.5
     
     # add chart to the sheet
     # the top-left corner of a chart
     # is anchored to cell E2 .
     sheet1.add_chart(chart, "A2")
 
+    if timeType=="detik":
+        img = Image('{}\Windrose bar\Per_Detik\Windrose bar {} per {}.png'.format(pool_path_simpan,file_name,timeType))
+    else:
+        img = Image('{}\Windrose bar\Per_Menit\Windrose bar {} per {}.png'.format(pool_path_simpan,file_name,timeType))  
 
-    img = Image('{}\Windrose bar {} per {}.png'.format(pool_path_simpan,file_name,timeType))
     
     #adjusting size
     img.height=450
@@ -352,6 +542,7 @@ def simpan_excel_openpyxl(pool_path_simpan,nama_file_analitik,pool_json_raw,time
 
 
 
-
-
-    workbook.save('{}\{} per {}.xlsx'.format(pool_path_simpan,nama_file_analitik,timeType))
+    if len(pool_json_raw)==86400:
+        workbook.save('{}\Analytics\Per_Detik\{} per {}.xlsx'.format(pool_path_simpan,nama_file_analitik,timeType))
+    else: 
+        workbook.save('{}\Analytics\Per_Menit\{} per {}.xlsx'.format(pool_path_simpan,nama_file_analitik,timeType))

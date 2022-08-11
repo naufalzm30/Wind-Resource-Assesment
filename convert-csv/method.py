@@ -21,9 +21,13 @@ def panggil_json_raw(path):
         
         return raw  
 
-def simpan_csv(nama_untuk_disimpan,json_yang_mau_disimpan,path_simpan):
+def simpan_csv(nama_untuk_disimpan,json_yang_mau_disimpan,path_simpan,type):
     count = 0
-    path='{}\{}.csv'.format(path_simpan,nama_untuk_disimpan)
+    if type=="d":
+        path='{}\RAW\Per_Detik\CSV\{}.csv'.format(path_simpan,nama_untuk_disimpan)
+    else:
+        path='{}\RAW\Per_Menit\CSV\{}.csv'.format(path_simpan,nama_untuk_disimpan)
+    
     dataSave = open(path, 'w', newline='')
 
     csv_writer = csv.writer(dataSave,delimiter=';')
@@ -36,9 +40,11 @@ def simpan_csv(nama_untuk_disimpan,json_yang_mau_disimpan,path_simpan):
         csv_writer.writerow(data.values())
     dataSave.close()
 
-def simpan_json(nama_untuk_disimpan,json_yang_masuk,path_simpan):
-
-    path='{}\{}.json'.format(path_simpan,nama_untuk_disimpan)
+def simpan_json(nama_untuk_disimpan,json_yang_masuk,path_simpan,type):
+    if type=="d":
+        path='{}\RAW\Per_Detik\JSON\{}.json'.format(path_simpan,nama_untuk_disimpan)
+    else:
+        path='{}\RAW\Per_Menit\JSON\{}.json'.format(path_simpan,nama_untuk_disimpan)
     with open(path, "w") as outfile:
         outfile.write(json_yang_masuk)
     outfile.close()
@@ -58,7 +64,7 @@ def proses_per_menit(json_raw_second):
         KA_simpan.append(float(i['Kec_angin']))
         DA_simpan.append(float(i['Derajat_angin']))
         power_simpan.append(float(i['Power']))
-        a = list([i['ID_Turbin'],i['Date'],i['Time']])
+        a = list([i['ID_Device'],i['Date'],i['Time']])
         b = (i["Time"])
         
         waktu.append(b)
@@ -120,7 +126,7 @@ def proses_per_menit(json_raw_second):
     json_untuk_csv=[]
     count=0
     for i in param_fix:
-        json_param = {"ID_Turbin":param_fix[count][0],"Date":param_fix[count][1],"Time":param_fix[count][2],"Kec_angin":float(KA_avg[count]),"Arah_angin":Arah_angin[count],"Derajat_angin":int(DA_avg[count]),"Power":float(power_avg[count])}
+        json_param = {"ID_Device":param_fix[count][0],"Date":param_fix[count][1],"Time":param_fix[count][2],"Kec_angin":float(KA_avg[count]),"Arah_angin":Arah_angin[count],"Derajat_angin":int(DA_avg[count]),"Power":float(power_avg[count])}
         json_untuk_csv.append(json_param)
         count+=1
         if(i==param_fix[-1]):
@@ -144,7 +150,12 @@ def buat_grafik(pool_grafik1,pool_grafik2,counter,pool_path_simpan,nama_file_sim
     # start, end = ax1.get_xlim()
     ax1.set_xticks(pool_grafik1[counter][::gap])
     ax1.set_ylabel("Kec angin m/s")
-    plt.savefig("{}\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+
+    if penanda=="second":
+        plt.savefig("{}\Grafik\Per_Detik\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+    else:
+        plt.savefig("{}\Grafik\Per_Menit\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+    
     plt.close(plt.figure("per_{}_{}".format(penanda,counter+1),figsize=(10, 3)))
 
 def buat_windrose(derajat,kec_angin,pool_path_simpan,nama_file_simpan,wind_type,dataType):
@@ -152,18 +163,40 @@ def buat_windrose(derajat,kec_angin,pool_path_simpan,nama_file_simpan,wind_type,
     
     if (wind_type=="bar"):
         wx.bar(derajat,kec_angin,normed=True, opening=0.8,bins=np.arange(0,12,2),nsector=8)
+        wx.set_legend(bbox_to_anchor=[-0.1, 0],loc='lower left')
+        if dataType=="per detik":
+            plt.savefig("{}\Windrose Bar\Per_Detik\Windrose {} {} {}.png".format(pool_path_simpan,wind_type,nama_file_simpan,dataType))
+        else:
+            plt.savefig("{}\Windrose Bar\Per_Menit\Windrose {} {} {}.png".format(pool_path_simpan,wind_type,nama_file_simpan,dataType))
+    
+
+
     else:
+        
         wx.contour(derajat,kec_angin,normed=True,bins=np.arange(0, 12,2), cmap=cm.hot, lw=3,nsector=8)
+        wx.set_legend(bbox_to_anchor=[-0.1, 0],loc='lower left')
     # wx.set_yticklabels(["20%","40%","60%","80%","100%"])
-    wx.set_legend(bbox_to_anchor=[-0.1, 0],loc='lower left')
-    plt.savefig("{}\Windrose {} {} {}.png".format(pool_path_simpan,wind_type,nama_file_simpan,dataType))
+        if dataType=="per detik":
+            plt.savefig("{}\Windrose Contour\Per_Detik\Windrose {} {} {}.png".format(pool_path_simpan,wind_type,nama_file_simpan,dataType))
+        else:
+            plt.savefig("{}\Windrose Contour\Per_Menit\Windrose {} {} {}.png".format(pool_path_simpan,wind_type,nama_file_simpan,dataType))
+    
     plt.close()
 
+def append_keluaran(arah,mean_kec,std_kec):
+
+    if arah:
+        mean_kec.append(np.mean(arah))
+        std_kec.append(np.std(arah))
+    else:
+        mean_kec.append(0)
+        std_kec.append(0)
 
 def keluaran_analitik(json_untuk_csv):
 
     a=[]
     b=[]
+    c=[]
     
     utara_kec=[]
     timur_laut_kec=[]
@@ -188,6 +221,7 @@ def keluaran_analitik(json_untuk_csv):
     for z in (json_untuk_csv):
         a.append(z["Time"])
         b.append(z["Kec_angin"])
+        c.append(z["Power"])
         match z['Arah_angin']:
             case 'U':
                 param_arah_angin={"Derajat_angin":z['Derajat_angin'],"Kec_angin":z['Kec_angin']}
@@ -245,7 +279,17 @@ def keluaran_analitik(json_untuk_csv):
                 barat_laut_power.append(z['Power'])
 
                 data_windrose.append(param_arah_angin)
-    print(pd.DataFrame(data_windrose))
+    # print(pd.DataFrame(data_windrose))
+    max_kec_all=max(b)
+    mean_kec_all=np.mean(b)
+    std_kec_all=np.std(b)
+
+    max_power_all=max(c)
+    mean_power_all=np.mean(c)
+    std_power_all=np.std(c)
+
+
+
     max_kec=[]
     max_power=[]
     mean_kec=[]
@@ -253,64 +297,90 @@ def keluaran_analitik(json_untuk_csv):
     std_kec=[]
     std_power=[]
 
-    max_kec.append(max(utara_kec))        
-    max_kec.append(max(timur_laut_kec))
-    max_kec.append(max(timur_kec))
-    max_kec.append(max(tenggara_kec))
-    max_kec.append(max(selatan_kec))
-    max_kec.append(max(barat_daya_kec))
-    max_kec.append(max(barat_kec))
-    max_kec.append(max(barat_laut_kec))
+    max_kec.append(max(utara_kec,default=0))        
+    max_kec.append(max(timur_laut_kec,default=0))
+    max_kec.append(max(timur_kec,default=0))
+    max_kec.append(max(tenggara_kec,default=0))
+    max_kec.append(max(selatan_kec,default=0))
+    max_kec.append(max(barat_daya_kec,default=0))
+    max_kec.append(max(barat_kec,default=0))
+    max_kec.append(max(barat_laut_kec,default=0))
+    max_kec.append(max_kec_all)
 
 
-    max_power.append(max(utara_power))        
-    max_power.append(max(timur_laut_power))
-    max_power.append(max(timur_power))
-    max_power.append(max(tenggara_power))
-    max_power.append(max(selatan_power))
-    max_power.append(max(barat_daya_power))
-    max_power.append(max(barat_power))
-    max_power.append(max(barat_laut_power))
-
-
-    mean_kec.append(np.mean(utara_kec))        
-    mean_kec.append(np.mean(timur_laut_kec))
-    mean_kec.append(np.mean(timur_kec))
-    mean_kec.append(np.mean(tenggara_kec))
-    mean_kec.append(np.mean(selatan_kec))
-    mean_kec.append(np.mean(barat_daya_kec))
-    mean_kec.append(np.mean(barat_kec))
-    mean_kec.append(np.mean(barat_laut_kec))
-
-
-    mean_power.append(np.mean(utara_power))        
-    mean_power.append(np.mean(timur_laut_power))
-    mean_power.append(np.mean(timur_power))
-    mean_power.append(np.mean(tenggara_power))
-    mean_power.append(np.mean(selatan_power))
-    mean_power.append(np.mean(barat_daya_power))
-    mean_power.append(np.mean(barat_power))
-    mean_power.append(np.mean(barat_laut_power))
-
-    std_kec.append(np.std(utara_kec))        
-    std_kec.append(np.std(timur_laut_kec))
-    std_kec.append(np.std(timur_kec))
-    std_kec.append(np.std(tenggara_kec))
-    std_kec.append(np.std(selatan_kec))
-    std_kec.append(np.std(barat_daya_kec))
-    std_kec.append(np.std(barat_kec))
-    std_kec.append(np.std(barat_laut_kec))
-
-
-    std_power.append(np.std(utara_power))        
-    std_power.append(np.std(timur_laut_power))
-    std_power.append(np.std(timur_power))
-    std_power.append(np.std(tenggara_power))
-    std_power.append(np.std(selatan_power))
-    std_power.append(np.std(barat_daya_power))
-    std_power.append(np.std(barat_power))
-    std_power.append(np.std(barat_laut_power))
+    max_power.append(max(utara_power,default=0))        
+    max_power.append(max(timur_laut_power,default=0))
+    max_power.append(max(timur_power,default=0))
+    max_power.append(max(tenggara_power,default=0))
+    max_power.append(max(selatan_power,default=0))
+    max_power.append(max(barat_daya_power,default=0))
+    max_power.append(max(barat_power,default=0))
+    max_power.append(max(barat_laut_power,default=0))
+    max_power.append(max_power_all)
 
     
+
+    append_keluaran(utara_kec,mean_kec,std_kec)        
+    append_keluaran(timur_laut_kec,mean_kec,std_kec)
+    append_keluaran(timur_kec,mean_kec,std_kec)
+    append_keluaran(tenggara_kec,mean_kec,std_kec)
+    append_keluaran(selatan_kec,mean_kec,std_kec)
+    append_keluaran(barat_daya_kec,mean_kec,std_kec)
+    append_keluaran(barat_kec,mean_kec,std_kec)
+    append_keluaran(barat_laut_kec,mean_kec,std_kec)
+
+    append_keluaran(utara_power,mean_power,std_power)        
+    append_keluaran(timur_laut_power,mean_power,std_power)
+    append_keluaran(timur_power,mean_power,std_power)
+    append_keluaran(tenggara_power,mean_power,std_power)
+    append_keluaran(selatan_power,mean_power,std_power)
+    append_keluaran(barat_daya_power,mean_power,std_power)
+    append_keluaran(barat_power,mean_power,std_power)
+    append_keluaran(barat_laut_power,mean_power,std_power)
+
+    # std_kec.append(np.std(utara_kec))        
+    # std_kec.append(np.std(timur_laut_kec))
+    # std_kec.append(np.std(timur_kec))
+    # std_kec.append(np.std(tenggara_kec))
+    # std_kec.append(np.std(selatan_kec))
+    # std_kec.append(np.std(barat_daya_kec))
+    # std_kec.append(np.std(barat_kec))
+    # std_kec.append(np.std(barat_laut_kec))
+    # mean_power.append(np.mean(utara_power))        
+    # mean_power.append(np.mean(timur_laut_power))
+    # mean_power.append(np.mean(timur_power))
+    # mean_power.append(np.mean(tenggara_power))
+    # mean_power.append(np.mean(selatan_power))
+    # mean_power.append(np.mean(barat_daya_power))
+    # mean_power.append(np.mean(barat_power))
+    # mean_power.append(np.mean(barat_laut_power))
+    # std_power.append(np.std(utara_power))        
+    # std_power.append(np.std(timur_laut_power))
+    # std_power.append(np.std(timur_power))
+    # std_power.append(np.std(tenggara_power))
+    # std_power.append(np.std(selatan_power))
+    # std_power.append(np.std(barat_daya_power))
+    # std_power.append(np.std(barat_power))
+    # std_power.append(np.std(barat_laut_power))
+
+
+
+
+
+    mean_kec.append(mean_kec_all)
+
+
+    
+    mean_power.append(mean_power_all)
+
+    
+    std_kec.append(std_kec_all)
+
+
+    
+    std_power.append(std_power_all)
+
+    
+       
 
     return (data_windrose,max_kec,max_power,mean_kec,mean_power,std_kec,std_power,a,b)

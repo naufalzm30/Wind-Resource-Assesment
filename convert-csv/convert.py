@@ -1,6 +1,7 @@
 
 from cProfile import label
 from datetime import datetime, timedelta
+from itertools import count
 from numpy import dtype, spacing
 from method import *
 
@@ -35,7 +36,12 @@ def main():
     progress.start()
     pool_json_raw=openFile()
 
-    file_json_raw = (glob.glob('{}\*.json'.format(pool_json_raw)))
+    file_json_raw = (glob.glob('{}\WRA\*.json'.format(pool_json_raw)))
+    counter_h=0
+    for h in file_json_raw:
+        file_json_raw[counter_h]=os.path.normpath(h)
+        counter_h+=1
+ 
     pool_json_raw=[]
     pool_json_csv=[]
     jcounter=0
@@ -47,7 +53,8 @@ def main():
     pool_grafik_menit_d=[]
     keluaran_analitik_detik=[]
     keluaran_analitik_menit=[]
-    for j in (file_json_raw):
+    for j in tqdm(file_json_raw):
+        
         a=[]
         b=[]
         json_raw_second=panggil_json_raw(os.path.normpath(j))
@@ -85,17 +92,55 @@ def main():
     pool_path_simpan = openFile()
     print(pool_path_simpan)
     kcounter=0
+    # buat_folder
+
+    all_folder_needed=[
+        "{}\RAW".format(pool_path_simpan),
+        "{}\RAW\Per_Detik".format(pool_path_simpan),
+        "{}\RAW\Per_Detik\CSV".format(pool_path_simpan),
+        "{}\RAW\Per_Detik\JSON".format(pool_path_simpan),
+        "{}\RAW\Per_Menit".format(pool_path_simpan),
+        "{}\RAW\Per_Menit\CSV".format(pool_path_simpan),
+        "{}\RAW\Per_Menit\JSON".format(pool_path_simpan),
+        "{}\Grafik".format(pool_path_simpan),
+        "{}\Grafik\Per_Detik".format(pool_path_simpan),
+        "{}\Grafik\Per_Menit".format(pool_path_simpan),
+        "{}\Windrose Bar".format(pool_path_simpan),
+        "{}\Windrose Contour".format(pool_path_simpan),
+        "{}\Windrose Bar\Per_Detik".format(pool_path_simpan),
+        "{}\Windrose Bar\Per_Menit".format(pool_path_simpan),
+        "{}\Windrose Contour\Per_Detik".format(pool_path_simpan),
+        "{}\Windrose Contour\Per_Menit".format(pool_path_simpan),
+        "{}\Analytics".format(pool_path_simpan),
+        "{}\Analytics\Per_Detik".format(pool_path_simpan),
+        "{}\Analytics\Per_Menit".format(pool_path_simpan)
+        ]
+
+    for i in all_folder_needed:
+        isExist = os.path.exists(i)
+
+        if not isExist:       
+            # Create a new directory because it does not exist 
+            os.makedirs("{}".format(i))
+
+   
+
     for k in tqdm(file_json_raw):
         
         file_name = os.path.basename(k).split('.')[0]
         file_name_custom=file_name.split('-')
-
+        print("\n"+file_name)
         nama_file_proses = ("{}(P)-{}-{}-{}".format(file_name_custom[0],file_name_custom[1],file_name_custom[2],file_name_custom[3]))
         nama_file_analitik = ("{}(A)-{}-{}-{}".format(file_name_custom[0],file_name_custom[1],file_name_custom[2],file_name_custom[3]))
         
-        simpan_csv(nama_file_proses,pool_json_csv[kcounter],pool_path_simpan)
-        simpan_csv(file_name,pool_json_raw[kcounter],pool_path_simpan)
-        simpan_json(nama_file_proses,(json.dumps(pool_json_csv[kcounter])),pool_path_simpan)
+
+
+
+
+        simpan_csv(nama_file_proses,pool_json_csv[kcounter],pool_path_simpan,"m")
+        simpan_csv(file_name,pool_json_raw[kcounter],pool_path_simpan,"d")
+        simpan_json(nama_file_proses,(json.dumps(pool_json_csv[kcounter])),pool_path_simpan,"m")
+        simpan_json(file_name,(json.dumps(pool_json_raw[kcounter])),pool_path_simpan,"d")
         
 
 

@@ -2,12 +2,13 @@ import glob
 from tkinter import filedialog
 import os
 import json
+import datetime
 
 
 filepaths = filedialog.askdirectory()
 pool_raw=filepaths
-file_json_raw =glob.glob('{}\*.json'.format(pool_raw))
-
+file_json_raw =glob.glob('{}\WRA\*.json'.format(pool_raw))
+file_json_raw.extend(glob.glob('{}\RTS\**\*.json'.format(pool_raw), recursive=True))
 
 time_bener=['00:00:00',
 '00:00:01',
@@ -86411,28 +86412,95 @@ time_bener=['00:00:00',
 '23:59:59',
 ]
 
+def indexExists(list,index):
+    try:
+        list[index]
+        return True
+    except IndexError:
+        return False
 
 # print(file_json_raw)
-count=0
-count_i=0
-json_olah=[]
+
+
 # print(file_json_raw)
 for i in file_json_raw:
     a= os.path.normpath(i)
-    with open(a) as json_file:
+    
+   
+    
+    with open(a,'r+') as json_file:
         json_raw=json.load(json_file) 
+    # print(json_raw[0]['ID_Device'])
+    
     if (len(json_raw)!=86400):
+        print(a)
+        print(len(json_raw))
         # print(float(json_raw[:]['Kec_angin']))
         time_cek=[]
+        json_olah=[]
+        ID_Device=""
         for k in json_raw:
             time_cek.append(k['Time'])
-
-        print(a)
-        print("\n")
-        
-        # print(time_bener[0])
+            date=k['Date']
+            # date=datetime.strptime(k['Date'], "%d/%m/%Y")
+        print(date)
         count=0
         count_i=0
+
+        if (list(dict(json_raw[1]).values())[0])=="WRA":
+            ID_Device=list(dict(json_raw[1]).values())[0]
+        else:
+            ID_Device=list(dict(json_raw[1]).values())[0]
+
+        for i in time_bener:
+            # print(((time_cek[count_i])))
+            if (indexExists(time_cek,count_i)==True):
+                if ((time_bener[count])<(time_cek[count_i])):
+
+                    if ID_Device=="WRA":
+                        c={"ID_Device":ID_Device,"Date":date,"Time":time_bener[count],"Kec_angin":0,"Arah_angin":"U","Derajat_angin":0,"Power":0}
+                    else:
+                        c={"ID_Turbin":ID_Device,"Date":date,"Time":time_bener[count],"RTS":0}
+
+                    masukin=c
+                    json_olah.insert(count,masukin)
+                    count+=1
+                else:
+                    json_olah.append(json_raw[count_i])
+                    count+=1
+                    count_i+=1
+            else:
+                if ID_Device=="WRA":
+                    c={"ID_Device":ID_Device,"Date":date,"Time":time_bener[count],"Kec_angin":0,"Arah_angin":"U","Derajat_angin":0,"Power":0}
+                else:
+                    c={"ID_Turbin":ID_Device,"Date":date,"Time":time_bener[count],"RTS":0}
+
+                masukin=c
+                json_olah.insert(count,masukin)
+                count+=1
+
+        with open(a, "w") as outfile:
+            json.dump(json_olah,outfile,indent=4)
+
+
+    # json.dumps(json_olah,json_file)
+        # json.dump(json_olah,json_file)
+    with open(a,'r+') as json_file:
+        json_raw=json.load(json_file)
+            # print(filepaths)
+            # print("\n")
+
+    # if ((json_raw[0]['Time'])!="00:00:00") or ((json_raw[86399]['Time'])!="23:59:59"):
+    #     print(a)
+    print(a)
+    print(len(json_raw))
+    
+
+    
+        
+        # print(time_bener[0])
+        # count=0
+        # count_i=0
         # for j in time_cek:
         #     if (str(time_cek[count])>str(time_bener[count_i])):
         #         print(time_bener[count_i])
