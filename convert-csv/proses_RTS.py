@@ -86454,6 +86454,23 @@ for i in retrieved_wt1:
     sheet1_2 = workbook2.active
     sheet1_2.title = "Process"
 
+
+    # ax1 = plt.figure("per_{}".format(penanda,counter+1),figsize=(10, 3)).add_subplot(111)
+    # ax1.plot(pool_grafik1[counter], pool_grafik2[counter]) 
+    # # start, end = ax1.get_xlim()
+    # ax1.set_xticks(pool_grafik1[counter][::gap])
+    # ax1.set_ylabel("Kec angin m/s")
+
+    # if penanda=="second":
+    #     plt.savefig("{}\Grafik\Per_Detik\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+    # else:
+    #     plt.savefig("{}\Grafik\Per_Menit\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+    # plt.savefig("{}\Grafik\Per_Detik\Grafik per {} {}.png".format(pool_path_simpan,penanda,nama_file_simpan))
+    # plt.close(plt.figure("per_{}_{}".format(penanda,counter+1),figsize=(10, 3)))
+
+
+    count_plot=1
+    ax1 = plt.figure("per_{}".format(count_plot),figsize=(10, 3)).add_subplot(111)
     for j in wt_bersangkutan:
         wt=panggil_json_raw(j)
         print(list(dict(wt[1]).values())[0])
@@ -86464,6 +86481,13 @@ for i in retrieved_wt1:
             RTS_simpan.append(float(t['RTS']))
             a = list([t['Date'],t['Time']])
             param_not_fix.append(a)
+
+        
+        ax1.plot(time_bener, RTS_simpan, label=list(dict(wt[1]).values())[0]) 
+        ax1.set_xticks(time_bener[::10800])
+        ax1.set_ylabel("RPM")
+        plt.legend()
+
         RTS = np.array(RTS_simpan)
         RTS_avg = np.round(np.mean(RTS.reshape(-1, 60), axis=1),decimals=2)
         print(len(RTS_avg))
@@ -86523,7 +86547,8 @@ for i in retrieved_wt1:
         
         column_wt+=1
 
-    
+    plt.savefig("{}\grafik {} per detik.png".format(pool_json_raw,file_wt_yang_ini))
+    plt.close(plt.figure("per_{}".format(count_plot),figsize=(10, 3)))
     workbook.save('{}\RTS(P) {} per detik.xlsx'.format(pool_json_raw,file_wt_yang_ini))
     workbook2.save('{}\RTS(P) {} per menit.xlsx'.format(pool_json_raw,file_wt_yang_ini))
 
