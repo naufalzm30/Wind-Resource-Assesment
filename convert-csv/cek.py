@@ -158,30 +158,41 @@
 
 
 
-# import necessary modules
-import bokeh
-from bokeh.charts import Scatter, output_notebook, show
-import pandas as pd
+# # import necessary modules
+# import bokeh
+# from bokeh.charts import Scatter, output_notebook, show
+# import pandas as pd
   
-# output to notebook
-output_notebook()
+# # output to notebook
+# output_notebook()
   
-# read data in dataframe
-df = pd.read_csv(r"D:/kaggle / mcdonald / menu.csv")
+# # read data in dataframe
+# df = pd.read_csv(r"D:/kaggle / mcdonald / menu.csv")
   
-# create scatter plot
-p = Scatter(df, x = "Carbohydrates", y = "Saturated Fat",
-            title = "Saturated Fat vs Carbohydrates",
-            xlabel = "Carbohydrates", ylabel = "Saturated Fat",
-            color = "orange")
+# # create scatter plot
+# p = Scatter(df, x = "Carbohydrates", y = "Saturated Fat",
+#             title = "Saturated Fat vs Carbohydrates",
+#             xlabel = "Carbohydrates", ylabel = "Saturated Fat",
+#             color = "orange")
    
-# show the results
-show(p) 
+# # show the results
+# show(p) 
 
-# from datetime import datetime
-# time = "12:12:00"
-# date_time = datetime.strptime(time, "%H:%M:%S")
-# seconds = date_time.timestamp()
-# print(seconds)
+
+
+from datetime import datetime,timedelta
+time = "23:59:00"
+date="2022-8-14"
+
+tambah = "00:04:04"
+date_time = datetime.strptime(("{} {}").format(time,date), "%H:%M:%S %Y-%m-%d")
+time_tambah = datetime.strptime(tambah, "%H:%M:%S")
+
+result = date_time+timedelta(minutes=4, seconds=4)
+
+# seconds = result.timestamp()
+print(result)
+
+
 
 

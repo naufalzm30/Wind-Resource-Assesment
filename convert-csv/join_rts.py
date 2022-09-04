@@ -20,6 +20,8 @@ from openpyxl.styles import Font, Alignment,PatternFill
 
 from openpyxl.utils import get_column_letter
 
+from tqdm import tqdm
+
 def time_excel(time):
     date_time = datetime.datetime.strptime(time, "%H:%M:%S")
     a_timedelta = date_time - datetime.datetime(1900, 1, 1,)
@@ -43,7 +45,7 @@ for h in file_wt:
     file_wt[counter_h]=os.path.normpath(file_wt[counter_h])
     counter_h+=1
 
-for i in file_wra:
+for i in tqdm(file_wra):
     file_name = os.path.basename(i).split('.')[0]
     file_name_custom=file_name.split('-')
     file_wra_yang_ini="{}-{}-{}".format(file_name_custom[1],file_name_custom[2],file_name_custom[3])
