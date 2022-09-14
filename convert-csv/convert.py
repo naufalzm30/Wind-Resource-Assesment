@@ -1,11 +1,16 @@
 
 from cProfile import label
 from datetime import datetime, timedelta
-from itertools import count
+from itertools import count, cycle
 from numpy import dtype, spacing
-from method import *
 
+
+from method import *
 from excelsior import *
+
+
+import datetime
+import datetime as dt
 import os, psutil;
 import time
 import tkinter as tk
@@ -21,18 +26,74 @@ from tqdm import tqdm
 import xlsxwriter
 
 
+# class ImageLabel(tk.Label):
+#     """
+#     A Label that displays images, and plays them if they are gifs
+#     :im: A PIL Image instance or a string filename
+#     """
+#     def load(self, im):
+#         if isinstance(im, str):
+#             im = Image.open(im)
+#         frames = []
+ 
+#         try:
+#             for i in count(1):
+#                 frames.append(ImageTk.PhotoImage(im.copy()))
+#                 im.seek(i)
+#         except EOFError:
+#             pass
+#         self.frames = cycle(frames)
+ 
+#         try:
+#             self.delay = im.info['duration']
+#         except:
+#             self.delay = 100
+ 
+#         if len(frames) == 1:
+#             self.config(image=next(self.frames))
+#         else:
+#             self.next_frame()
+ 
+#     def unload(self):
+#         self.config(image=None)
+#         self.frames = None
+ 
+#     def next_frame(self):
+#         if self.frames:
+#             self.config(image=next(self.frames))
+#             self.after(self.delay, self.next_frame)
+
+
 start_time = time.time()
 
 
 # warna 
 #104c84
 
+def _quit():
+    w.quit()
+    w.destroy() 
+
+w=tk.Tk()
+w.protocol("WM_DELETE_WINDOW", _quit)
+w.geometry('950x400')
+w.resizable(False, False)
+w.configure(bg='#104c84')
+
+bg = PhotoImage(file="asset\main.png")
+
+
+
+my_label = Label(w, image=bg)
+my_label.place(x=0,y=0, relheight=1,relwidth=1)
+
+
+progress  = ttk.Progressbar(w, orient = HORIZONTAL, length=180)
+
+progress.config(mode='indeterminate')
 
 def main():
-    root_progress = Tk()
-    progress  = ttk.Progressbar(root_progress, orient = HORIZONTAL, length=180)
-    progress.pack()
-    progress.config(mode='indeterminate')
+    progress.pack(pady=55, side=tk.BOTTOM)
     progress.start()
     pool_json_raw=openFile()
 
@@ -54,6 +115,7 @@ def main():
     keluaran_analitik_detik=[]
     keluaran_analitik_menit=[]
     for j in tqdm(file_json_raw):
+        progress.start()
         
         a=[]
         b=[]
@@ -86,8 +148,7 @@ def main():
             jcounter=0
     print(len(pool_json_csv))
     
-    progress.stop()
-    root_progress.destroy()
+    
 
     pool_path_simpan = openFile()
     print(pool_path_simpan)
@@ -125,7 +186,8 @@ def main():
 
    
 
-    for k in tqdm(file_json_raw):
+    for k in (file_json_raw):
+        w.update()
         
         file_name = os.path.basename(k).split('.')[0]
         file_name_custom=file_name.split('-')
@@ -175,68 +237,271 @@ def main():
     print(psutil.Process().memory_info().rss / (1024 * 1024))
 
     print ("My program took", time.time() - start_time, "to run")
+    import ctypes  # An included library with Python install.
+    def Mbox(title, text, style):
+        return ctypes.windll.user32.MessageBoxW(0, text, title, style)
+    Mbox('proses wra', 'Proses Selesai', 1)
+
+    progress.pack_forget()
+
+    
+    
 
 
-
-def _quit():
-    w.quit()
-    w.destroy() 
-
-w=tk.Tk()
-w.protocol("WM_DELETE_WINDOW", _quit)
-w.geometry('950x400')
-w.resizable(False, False)
-w.configure(bg='#104c84')
-
-bg = PhotoImage(file="main.png")
-
-
-
-my_label = Label(w, image=bg)
-my_label.place(x=0,y=0, relheight=1,relwidth=1)
-
-
-
-
-
-
-def on_enter(e):
-    global new_image
+def image_proses(source):
     basewidth = 135
-    img = Image.open('baru 1.jpeg')
+    img = Image.open(source)
     wpercent = (basewidth / float(img.size[0]))
     hsize = int((float(img.size[1]) * float(wpercent)))
     img = img.resize((basewidth, hsize))
     new_image= ImageTk.PhotoImage(img)
-    myButton.config(image=new_image)
+    return new_image
 
 
-def on_leave(e):
-    global new_image
-    basewidth = 135
-    img = Image.open('baru 2.jpeg')
-    wpercent = (basewidth / float(img.size[0]))
-    hsize = int((float(img.size[1]) * float(wpercent)))
-    img = img.resize((basewidth, hsize))
-    new_image= ImageTk.PhotoImage(img)
-    myButton.config(image=new_image)
 
 
-basewidth = 135
-img = Image.open('baru 2.jpeg')
-wpercent = (basewidth / float(img.size[0]))
-hsize = int((float(img.size[1]) * float(wpercent)))
-img = img.resize((basewidth, hsize))
-new_image= ImageTk.PhotoImage(img)
+def untuk_buat_folder_RTS(nama_RTS,path_exist):
+    isExist = os.path.exists("{}\{}".format(path_exist,nama_RTS))
 
-myButton = Button(w, image=new_image,bd=0,command=main)
-myButton.bind('<Enter>', on_enter)
-myButton.bind('<Leave>',on_leave)
-myButton.place(x=475,y=320,anchor=CENTER)
+    if not isExist:
+        os.makedirs("{}\{}".format(path_exist,nama_RTS))
+
+    path_exist="{}\{}".format(path_exist,nama_RTS)
+    return path_exist
+
+def convert_csv():
+    os.system('cls||clear')
+    progress.pack(pady=55, side=tk.BOTTOM)
+    progress.start()
+    filepaths = filedialog.askdirectory()
+    pool_raw = filepaths
+    print(filepaths)
+    file_csv_raw = glob.glob('{}\WRA\*.csv'.format(pool_raw))
+
+    file_csv_raw.extend(
+        glob.glob('{}\RTS\**\*.csv'.format(pool_raw), recursive=True))
+
+    isExist = os.path.exists("{}\JSON_olah".format(pool_raw))
+
+    if not isExist:
+
+        # Create a new directory because it does not exist
+        os.makedirs("{}\JSON_olah".format(pool_raw))
+
+    kec_angin = []
+    count = 0
+    for h in file_csv_raw:
+        a = os.path.normpath(h)
+        print(a)
+        csv_file = pd.DataFrame(pd.read_csv("{}".format(
+            a), sep=";", header=None, index_col=False, skipinitialspace=True, skip_blank_lines=True))
+        # print(csv_file[1])
+        # retrieved_elements = list(filter(lambda x: 'WR' in x, csv_file[0]))
+        # print(retrieved_elements[0])
+
+        siap_json = []
+        print(csv_file[0][1])
+        if ((csv_file[0][0][:2]) == "WR"):
+            path_exist = "{}\JSON_olah\WRA".format(pool_raw)
+            isExist = os.path.exists(path_exist)
+
+            if not isExist:
+                os.makedirs("{}\JSON_olah\WRA".format(pool_raw))
+
+            power = []
+            power_ro = 1.2
+            power_A = 1
+
+            csv_file.columns = ["ID_Device", "Date", "Time",
+                                "Kec_angin", "Arah_angin", "Derajat_angin"]
+            csv_file = csv_file.assign(Power=lambda x: np.round(
+                ((power_ro*power_A*((x.Kec_angin)**3))/2), decimals=4))
+
+            ID_Device = csv_file['ID_Device'].values.tolist()
+            Date = csv_file['Date'].values.tolist()
+            Time_raw = csv_file['Time'].values.tolist()
+            Kec_angin = csv_file['Kec_angin'].values.tolist()
+            Arah_angin = csv_file['Arah_angin'].values.tolist()
+            Derajat_angin = csv_file['Derajat_angin'].values.tolist()
+            Power = csv_file['Power'].values.tolist()
+            Time = []
+            # print(Time_raw)
+            for t in Time_raw:
+                try:
+                    Time.append('{}'.format(
+                        datetime.datetime.strptime(t, "%H:%M:%S").time()))
+                except ValueError as ve:
+                    Time.append('{}'.format(datetime.timedelta(
+                        seconds=(round(float(t)*86400)))))
+                    print(datetime.timedelta(seconds=(round(float(t)*86400))))
+            print(Time[0])
+
+            count = 0
+            for i in ID_Device:
+                ke_json = {"ID_Device": ID_Device[count], "Date": Date[count], "Time": Time[count], "Kec_angin": float(
+                    Kec_angin[count]), "Arah_angin": Arah_angin[count], "Derajat_angin": int(Derajat_angin[count]), "Power": float(Power[count])}
+                siap_json.append(ke_json)
+                count += 1
+        elif (csv_file[0][1] == "WRA"):
+            path_exist = "{}\JSON_olah\WRA".format(pool_raw)
+            isExist = os.path.exists(path_exist)
+
+            if not isExist:
+                os.makedirs("{}\JSON_olah\WRA".format(pool_raw))
+
+            csv_file.columns = ["ID_Device", "Date", "Time",
+                                "Kec_angin", "Arah_angin", "Derajat_angin", 'Power']
+            csv_file.drop(csv_file.index[0], inplace=True)
+            # print(csv_file)
+
+            ID_Device = csv_file['ID_Device'].values.tolist()
+            Date = csv_file['Date'].values.tolist()
+            Time_raw = csv_file['Time'].values.tolist()
+            Kec_angin = csv_file['Kec_angin'].values.tolist()
+            Arah_angin = csv_file['Arah_angin'].values.tolist()
+            Derajat_angin = csv_file['Derajat_angin'].values.tolist()
+            Power = csv_file['Power'].values.tolist()
+            Time = []
+
+            for t in Time_raw:
+                try:
+                    Time.append('{}'.format(
+                        datetime.datetime.strptime(t, "%H:%M:%S").time()))
+                except ValueError as ve:
+                    Time.append('{}'.format(datetime.timedelta(
+                        seconds=(round(float(t)*86400)))))
+                    print(datetime.timedelta(seconds=(round(float(t)*86400))))
+            print(Time[0])
+
+            count = 0
+            for i in ID_Device:
+                ke_json = {"ID_Device": ID_Device[count], "Date": Date[count], "Time": Time[count], "Kec_angin": float(
+                    Kec_angin[count]), "Arah_angin": Arah_angin[count], "Derajat_angin": int(Derajat_angin[count]), "Power": float(Power[count])}
+                siap_json.append(ke_json)
+                count += 1
+
+        else:
+            path_exist = "{}\JSON_olah\RTS".format(pool_raw)
+            isExist = os.path.exists(path_exist)
+
+            if not isExist:
+                os.makedirs("{}\JSON_olah\RTS".format(pool_raw))
+
+            if len(csv_file.axes[1]) > 4:
+                for i in range(4, len(csv_file.axes[1])):
+                    del csv_file[i]
+
+            csv_file.columns = ["ID_Turbin", "Date", "Time", "RTS"]
+            ID_Device = csv_file['ID_Turbin'].values.tolist()
+            Date = csv_file['Date'].values.tolist()
+            Time_raw = csv_file['Time'].values.tolist()
+            RTS = csv_file['RTS'].values.tolist()
+
+            Time = []
+
+            for t in Time_raw:
+                # print(t)
+                try:
+                    Time.append('{}'.format(
+                        datetime.datetime.strptime(t, "%H:%M:%S").time()))
+                except ValueError as ve:
+                    Time.append('{}'.format(datetime.timedelta(
+                        seconds=(round(float(t)*86400)))))
+                    print(datetime.timedelta(seconds=(round(float(t)*86400))))
+
+            count = 0
+            for i in ID_Device:
+                ke_json = {"ID_Turbin": ID_Device[count], "Date": Date[count],
+                          "Time": Time[count], "RTS": float(RTS[count])}
+                siap_json.append(ke_json)
+                count += 1
+            path_exist = untuk_buat_folder_RTS(ID_Device[0], path_exist)
+
+        # print(path_exist)
+
+        try:
+            ambil_date = datetime.datetime.strptime(Date[0], "%d/%m/%Y")
+        except ValueError as ve:
+            try:
+                ambil_date = datetime.datetime.strptime(Date[0], "%m/%d/%Y")
+            except:
+                ambil_date = datetime.datetime.strptime(Date[0], "%Y-%m-%d")
+
+        untuk_filename = datetime.datetime.strftime(ambil_date, "%y-%m-%d")
+        file_name = "{}-{}".format(ID_Device[0], untuk_filename)
+
+        path = "{}\{}".format(path_exist, file_name)
+
+        # print(siap_json)
+
+        # print(len(csv_file))
+
+        # df['Date'] = pd.to_datetime(df.Date, format='%Y-%m-%d %H:%M:%S')
+        # csv_file['Time'] = pd.to_datetime(csv_file.Time, format="%H:%M:%S")
+        # csv_file['Time']= csv_file['Time'].dt.strftime("%H:%M:%S")
+        # csv_file["ID_Device"].str.strip()
+        # csv_file["Date"].str.strip()
+        # csv_file["Time"].str.strip()
+        # csv_file["Derajat_angin"].str.strip()
+
+        with open('{}.json'.format(path), 'w') as outfile:  # as outfile:
+            json.dump(siap_json, outfile, indent=4)
+
+        del csv_file
+        count += 1
+    import ctypes  # An included library with Python install.
+    def Mbox(title, text, style):
+        return ctypes.windll.user32.MessageBoxW(0, text, title, style)
+    Mbox('convert csv to json', 'Proses Selesai', 1)
+
+    progress.pack_forget()
+
+proses_1=image_proses('asset/baru 2.jpeg')
+proses_2=image_proses('asset/baru 1.jpeg')
+
+
+
+
+def on_enter(e,source,button):
+    
+    if button=="myButton":
+        myButton.configure(image=source)
+    elif button=="myButton2":
+        myButton2.configure(image=source)
+
+
+def on_leave(e,source,button):
+    
+    if button=="myButton":
+        myButton.configure(image=source)
+    elif button=="myButton2":
+        myButton2.configure(image=source)
+
+# asset_loading = PhotoImage(file="asset\loading.gif")
+
+# loading = Label(w, image=asset_loading)
+# loading.place()
+
+myButton = tk.Button(w,bd=0,command=main)
+myButton.configure(image=proses_1)
+myButton.bind('<Enter>', lambda e, source= proses_2, button="myButton": on_enter(e, source, button))
+myButton.bind('<Leave>',lambda e, source= proses_1, button="myButton": on_leave(e, source, button))
+myButton.place(x=175,y=260,anchor=CENTER)
+
+myButton2 = tk.Button(w,bd=0,command=convert_csv)
+myButton2.configure(image=proses_1)
+myButton2.bind('<Enter>', lambda e, source= proses_2, button="myButton2": on_enter(e, source, button))
+myButton2.bind('<Leave>',lambda e, source= proses_1, button="myButton2": on_leave(e, source, button))
+myButton2.place(x=335,y=260,anchor=CENTER)
+
+# myButton2 = Button(w, image=new_image,bd=0,command=main)
+# myButton2.bind('<Enter>', on_enter)
+# myButton2.bind('<Leave>',on_leave)
+# myButton2.place(x=375,y=220,anchor=CENTER)
 
 w.title("PADS 1.0")
 
-p1 = PhotoImage(file = 'logo.png')
+p1 = PhotoImage(file = 'asset\logo.png')
 
 # Setting icon of master window
 w.iconphoto(False, p1)
