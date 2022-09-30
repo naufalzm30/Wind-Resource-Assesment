@@ -3,6 +3,7 @@ from tkinter import filedialog
 import os
 import json
 import datetime
+import time
 
 
 filepaths = filedialog.askdirectory()
@@ -86485,8 +86486,8 @@ for i in file_json_raw:
 
     # json.dumps(json_olah,json_file)
         # json.dump(json_olah,json_file)
-    with open(a,'r+') as json_file:
-        json_raw=json.load(json_file)
+    # with open(a,'r+') as json_file:
+    #     json_raw=json.load(json_file)
             # print(filepaths)
             # print("\n")
 
@@ -86494,6 +86495,9 @@ for i in file_json_raw:
     #     print(a)
     print(a)
     print(len(json_raw))
+
+finish = time.perf_counter()
+print("finish di ",finish," second")
     
 
     

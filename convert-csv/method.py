@@ -384,3 +384,30 @@ def keluaran_analitik(json_untuk_csv):
        
 
     return (data_windrose,max_kec,max_power,mean_kec,mean_power,std_kec,std_power,a,b)
+
+def indexExists(list,index):
+    try:
+        list[index]
+        return True
+    except IndexError:
+        return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

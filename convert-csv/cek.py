@@ -180,19 +180,48 @@
 
 
 
-from datetime import datetime,timedelta
-time = "23:59:00"
-date="2022-8-14"
+# from datetime import datetime,timedelta
+# time = "23:59:00"
+# date="2022-8-14"
 
-tambah = "00:04:04"
-date_time = datetime.strptime(("{} {}").format(time,date), "%H:%M:%S %Y-%m-%d")
-time_tambah = datetime.strptime(tambah, "%H:%M:%S")
+# tambah = "00:04:04"
+# date_time = datetime.strptime(("{} {}").format(time,date), "%H:%M:%S %Y-%m-%d")
+# time_tambah = datetime.strptime(tambah, "%H:%M:%S")
 
-result = date_time+timedelta(minutes=4, seconds=4)
+# result = date_time+timedelta(minutes=4, seconds=4)
 
-# seconds = result.timestamp()
-print(result)
+# # seconds = result.timestamp()
+# print(result)
 
+
+import time
+import multiprocessing as mp
+
+
+
+def sleep_coba(s,a):
+    print(" sleeping selama 1 detik")
+    time.sleep(1)
+    print(s, "done ", a)
+
+
+if __name__== "__main__":
+    t1_start = time.perf_counter()
+
+    print(t1_start)
+    multi_proses=[]
+    for i in range(10):
+        p1=mp.Process(target=sleep_coba,args=[i,"hehe"])
+        p1.start()
+        multi_proses.append(p1)
+
+    for p in multi_proses:
+        p.join()
+    
+    t1_stop = time.perf_counter()
+    finish=time.perf_counter()
+
+    print("finish di ",t1_stop-t1_start," detik")
 
 
 
